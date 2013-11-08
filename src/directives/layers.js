@@ -146,7 +146,20 @@ angular.module("leaflet-directive").directive('layers', function ($log, leafletD
                                         map.addLayer($scope.leafletLayers.overlays[new_name]);
                                     }
                                 }
-                            }
+								else {
+									if (newOverlayLayers[new_name].layerOptions && newOverlayLayers[new_name].layerOptions.opacity) {
+										if (layers.overlays[new_name].options.opacity != newOverlayLayers[new_name].layerOptions.opacity) {
+											layers.overlays[new_name].setOpacity(newOverlayLayers[new_name].layerOptions.opacity);
+										}
+									}
+
+									if (newOverlayLayers[new_name].layerOptions && newOverlayLayers[new_name].layerOptions.zIndex) {
+										if (layers.overlays[new_name].options.zIndex != newOverlayLayers[new_name].layerOptions.zIndex) {
+											layers.overlays[new_name].setZIndex(newOverlayLayers[new_name].layerOptions.zIndex);
+										}
+									}
+								}	
+							}                            
                         }
                     }, true);
                 }
@@ -157,8 +170,8 @@ angular.module("leaflet-directive").directive('layers', function ($log, leafletD
                 if (!isString(layerDefinition.type)) {
                     $log.error('[AngularJS - Leaflet] A base layer must have a type');
                     return null;
-                } else if (layerDefinition.type !== 'xyz' && layerDefinition.type !== 'wms' && layerDefinition.type !== 'group' && layerDefinition.type !== 'markercluster' && layerDefinition.type !== 'google' && layerDefinition.type !== 'bing') {
-                    $log.error('[AngularJS - Leaflet] A layer must have a valid type: "xyz, wms, group, google"');
+                } else if (layerDefinition.type !== 'xyz' && layerDefinition.type !== 'wms' && layerDefinition.type !== 'group' && layerDefinition.type !== 'markercluster' && layerDefinition.type !== 'google' && layerDefinition.type !== 'bing' && layerDefinition.type !== 'quadkey') {
+                    $log.error('[AngularJS - Leaflet] A layer must have a valid type: "xyz, wms, group, google, markercluster, bing, quadkey"');
                     return null;
                 }
                 if (layerDefinition.type === 'xyz' || layerDefinition.type === 'wms') {
@@ -200,6 +213,9 @@ angular.module("leaflet-directive").directive('layers', function ($log, leafletD
                     break;
                 case 'bing':
                     layer = createBingLayer(layerDefinition.bingKey, layerDefinition.layerOptions);
+                    break;
+                case 'quadkey':
+                    layer = createQuadkeyLayer(layerDefinition.url, layerDefinition.layerOptions);
                     break;
                 default:
                     layer = null;
@@ -247,6 +263,15 @@ angular.module("leaflet-directive").directive('layers', function ($log, leafletD
             function createBingLayer(key, options) {
 				if (Helpers.BingLayerPlugin.isLoaded()) {
                     var layer = new L.BingLayer(key, options);
+                    return layer;
+                } else {
+                    return null;
+                }
+            }
+			
+			function createQuadkeyLayer(url, options) {
+                if (Helpers.QuadkeyPlugin.isLoaded()) {
+                    var layer = new L.QuadKey(options);
                     return layer;
                 } else {
                     return null;

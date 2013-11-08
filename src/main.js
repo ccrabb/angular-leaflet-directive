@@ -183,6 +183,18 @@ var Helpers = {
                 return false;
             }
         },
+    },    
+    QuadkeyPlugin: {
+        isLoaded: function () {
+            return L.QuadKey !== undefined;
+        },
+        is: function (layer) {
+            if (this.isLoaded()) {
+                return layer instanceof L.QuadKey;
+            } else {
+                return false;
+            }
+		}
     },
     Leaflet: {
         DivIcon: {
