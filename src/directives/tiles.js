@@ -1,39 +1,66 @@
-angular.module("leaflet-directive").directive('tiles', function ($log, leafletData) {
+angular.module("leaflet-directive").directive('tiles', function ($log, leafletData, leafletMapDefaults, leafletHelpers) {
     return {
         restrict: "A",
         scope: false,
         replace: false,
-        transclude: false,
         require: 'leaflet',
 
-        link: function($scope, element, attrs, controller) {
-            var defaults = parseMapDefaults($scope.defaults);
-            var tiles = $scope.tiles;
+        link: function(scope, element, attrs, controller) {
+            var isDefined = leafletHelpers.isDefined,
+                leafletScope  = controller.getLeafletScope(),
+                tiles = leafletScope.tiles;
+
+            if (!isDefined(tiles) && !isDefined(tiles.url)) {
+                $log.warn("[AngularJS - Leaflet] The 'tiles' definition doesn't have the 'url' property.");
+                return;
+            }
 
             controller.getMap().then(function(map) {
-
+                var defaults = leafletMapDefaults.getDefaults(attrs.id);
                 var tileLayerObj;
-                var tileLayerUrl = defaults.tileLayer;
-                var tileLayerOptions = defaults.tileLayerOptions;
+                leafletScope.$watch("tiles", function(tiles) {
+                    var tileLayerOptions = defaults.tileLayerOptions;
+                    var tileLayerUrl = defaults.tileLayer;
 
-                if (angular.isDefined(tiles) && angular.isDefined(tiles.url)) {
-                    tileLayerUrl = tiles.url;
-                    $scope.$watch("tiles.url", function(url) {
-                        if (angular.isDefined(url)) {
-                            tileLayerObj.setUrl(url);
+                    // If no valid tiles are in the scope, remove the last layer
+                    if (!isDefined(tiles.url) && isDefined(tileLayerObj)) {
+                        map.removeLayer(tileLayerObj);
+                        return;
+                    }
+
+                    // No leafletTiles object defined yet
+                    if (!isDefined(tileLayerObj)) {
+                        if (isDefined(tiles.options)) {
+                            angular.copy(tiles.options, tileLayerOptions);
                         }
-                    });
-                } else {
-                    $log.warn("[AngularJS - Leaflet] The 'tiles' definition doesn't have the 'url' property.");
-                }
 
-                if (angular.isDefined(tiles) && angular.isDefined(tiles.options)) {
-                    angular.copy(tiles.options, tileLayerOptions);
-                }
+                        if (isDefined(tiles.url)) {
+                            tileLayerUrl = tiles.url;
+                        }
 
-                tileLayerObj = L.tileLayer(tileLayerUrl, tileLayerOptions);
-                tileLayerObj.addTo(map);
-                leafletData.setTiles(tileLayerObj, attrs.id);
+                        tileLayerObj = L.tileLayer(tileLayerUrl, tileLayerOptions);
+                        tileLayerObj.addTo(map);
+                        leafletData.setTiles(tileLayerObj, attrs.id);
+                        return;
+                    }
+
+                    // If the options of the tilelayer is changed, we need to redraw the layer
+                    if (isDefined(tiles.url) && isDefined(tiles.options) && !angular.equals(tiles.options, tileLayerOptions)) {
+                        map.removeLayer(tileLayerObj);
+                        tileLayerOptions = defaults.tileLayerOptions;
+                        angular.copy(tiles.options, tileLayerOptions);
+                        tileLayerUrl = tiles.url;
+                        tileLayerObj = L.tileLayer(tileLayerUrl, tileLayerOptions);
+                        tileLayerObj.addTo(map);
+                        leafletData.setTiles(tileLayerObj, attrs.id);
+                        return;
+                    }
+
+                    // Only the URL of the layer is changed, update the tiles object
+                    if (isDefined(tiles.url)) {
+                        tileLayerObj.setUrl(tiles.url);
+                    }
+                }, true);
             });
         }
     };

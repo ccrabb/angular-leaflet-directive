@@ -1,56 +1,68 @@
-angular.module("leaflet-directive").directive('geojson', function ($log, $rootScope) {
+angular.module("leaflet-directive").directive('geojson', function ($log, $rootScope, leafletData, leafletHelpers) {
     return {
         restrict: "A",
         scope: false,
         replace: false,
-        transclude: false,
         require: 'leaflet',
 
-        link: function($scope, element, attrs, controller) {
-            var map = controller.getMap();
-            var leafletGeoJSON;
+        link: function(scope, element, attrs, controller) {
+            var safeApply = leafletHelpers.safeApply,
+                isDefined = leafletHelpers.isDefined,
+                leafletScope  = controller.getLeafletScope(),
+                leafletGeoJSON = {};
 
             controller.getMap().then(function(map) {
-                $scope.$watch("geojson", function(geojson) {
-                    if (!isDefined(geojson)) {
-                        return;
-                    }
-
-                    if (isDefined(leafletGeoJSON)) {
+                leafletScope.$watch("geojson", function(geojson) {
+                    if (isDefined(leafletGeoJSON) && map.hasLayer(leafletGeoJSON)) {
                         map.removeLayer(leafletGeoJSON);
                     }
 
-                    if (isDefined(geojson.data)) {
-                        var resetStyleOnMouseout = geojson.resetStyleOnMouseout;
-
-                        leafletGeoJSON = L.geoJson(geojson.data, {
-                            style: geojson.style,
-                            onEachFeature: function(feature, layer) {
-                                layer.on({
-                                    mouseover: function(e) {
-                                        safeApply($scope, function() {
-                                            geojson.selected = feature;
-                                            $rootScope.$broadcast('leafletDirectiveMap.geojsonMouseover', e);
-                                        });
-                                    },
-                                    mouseout: function(e) {
-                                        if (resetStyleOnMouseout) {
-                                            leafletGeoJSON.resetStyle(e.target);
-                                        }
-                                        safeApply($scope, function() {
-                                            geojson.selected = undefined;
-                                            $rootScope.$broadcast('leafletDirectiveMap.geojsonMouseout', e);
-                                        });
-                                    },
-                                    click: function(e) {
-                                        safeApply($scope, function() {
-                                            $rootScope.$broadcast('leafletDirectiveMap.geojsonClick', geojson.selected, e);
-                                        });
-                                    }
-                                });
-                            }
-                        }).addTo(map);
+                    if (!(isDefined(geojson) && isDefined(geojson.data))) {
+                        return;
                     }
+
+                    var resetStyleOnMouseout = geojson.resetStyleOnMouseout,
+                        onEachFeature = geojson.onEachFeature;
+
+                    if (!onEachFeature) {
+                        onEachFeature = function(feature, layer) {
+                            if (leafletHelpers.LabelPlugin.isLoaded() && isDefined(geojson.label)) {
+                                layer.bindLabel(feature.properties.description);
+                            }
+
+                            layer.on({
+                                mouseover: function(e) {
+                                    safeApply(leafletScope, function() {
+                                        geojson.selected = feature;
+                                        $rootScope.$broadcast('leafletDirectiveMap.geojsonMouseover', e);
+                                    });
+                                },
+                                mouseout: function(e) {
+                                    if (resetStyleOnMouseout) {
+                                        leafletGeoJSON.resetStyle(e.target);
+                                    }
+                                    safeApply(leafletScope, function() {
+                                        geojson.selected = undefined;
+                                        $rootScope.$broadcast('leafletDirectiveMap.geojsonMouseout', e);
+                                    });
+                                },
+                                click: function(e) {
+                                    safeApply(leafletScope, function() {
+                                        $rootScope.$broadcast('leafletDirectiveMap.geojsonClick', geojson.selected, e);
+                                    });
+                                }
+                            });
+                        };
+                    }
+
+                    geojson.options = {
+                        style: geojson.style,
+                        onEachFeature: onEachFeature
+                    };
+
+                    leafletGeoJSON = L.geoJson(geojson.data, geojson.options);
+                    leafletData.setGeoJSON(leafletGeoJSON);
+                    leafletGeoJSON.addTo(map);
                 });
             });
         }

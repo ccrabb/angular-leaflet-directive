@@ -98,6 +98,33 @@ describe('Directive: leaflet', function() {
         });
     });
 
+    it('should create image overlay layer if correctly configured', function() {
+        angular.extend($rootScope, {
+            layers: {
+                baselayers: {
+                    imageOverlay: {
+                        name: 'imageOverlay',
+                        type: 'imageOverlay',
+                        url: 'url',
+                        bounds: [[0,1], [1,0]],
+                        layerOptions: {
+                        }
+                    },
+                },
+            }
+        });
+        var element = angular.element('<leaflet layers="layers"></leaflet>');
+        element = $compile(element)($rootScope);
+        var map;
+        leafletData.getMap().then(function(leafletMap) {
+            map = leafletMap;
+        });
+        $rootScope.$digest();
+        leafletData.getLayers().then(function(layers) {
+            expect(map.hasLayer(layers.baselayers.imageOverlay)).toBe(true);
+        });
+    });
+
     it('should create two layers if correctly configured', function() {
         angular.extend($rootScope, {
             layers: {
@@ -245,6 +272,20 @@ describe('Directive: leaflet', function() {
                         layerOptions: {
                             layers: 'osm',
                             format: 'image/png'
+                        }
+                    },
+                    imageOverlay1: {
+                        name: 'imageOverlay',
+                        type: 'imageOverlay',
+                        bounds: [[0,1], [1,0]],
+                        layerOptions: {
+                        }
+                    },
+                    imageOverlay2: {
+                        name: 'imageOverlay',
+                        type: 'imageOverlay',
+                        url: 'url',
+                        layerOptions: {
                         }
                     },
                 },
@@ -1110,7 +1151,7 @@ describe('Directive: leaflet', function() {
         expect(layers.overlays.cars.options.showCoverageOnHover).toBe(true);
         expect(layers.overlays.cars.options.zoomToBoundsOnClick).toBe(true);
         expect(layers.overlays.cars.options.spiderfyOnMaxZoom).toBe(true);
-        expect(layers.overlays.cars.options.removeOutsideVisibleBounds).toBe(true);
+        //expect(layers.overlays.cars.options.removeOutsideVisibleBounds).toBe(true);
     });
 
     it('should create a visible markercluster layer with options', function() {
@@ -1164,7 +1205,7 @@ describe('Directive: leaflet', function() {
         expect(layers.overlays.cars.options.showCoverageOnHover).toBe(false);
         expect(layers.overlays.cars.options.zoomToBoundsOnClick).toBe(true);
         expect(layers.overlays.cars.options.spiderfyOnMaxZoom).toBe(true);
-        expect(layers.overlays.cars.options.removeOutsideVisibleBounds).toBe(true);
+        //expect(layers.overlays.cars.options.removeOutsideVisibleBounds).toBe(true);
         expect(layers.overlays.cars.options.disableClusteringAtZoom).toEqual(18);
     });
 
@@ -1230,7 +1271,7 @@ describe('Directive: leaflet', function() {
         expect(layers.overlays.cars.options.showCoverageOnHover).toBe(false);
         expect(layers.overlays.cars.options.zoomToBoundsOnClick).toBe(true);
         expect(layers.overlays.cars.options.spiderfyOnMaxZoom).toBe(true);
-        expect(layers.overlays.cars.options.removeOutsideVisibleBounds).toBe(true);
+        //expect(layers.overlays.cars.options.removeOutsideVisibleBounds).toBe(true);
         expect(layers.overlays.cars.options.disableClusteringAtZoom).toEqual(18);
         // The layer has the two markers
         expect(layers.overlays.cars.hasLayer(markers.m1)).toBe(true);

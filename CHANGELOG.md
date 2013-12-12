@@ -1,6 +1,16 @@
 angular-leaflet-directive changelog
 ===================================
 
+## angular-leaflet-directive (trunk)
+* Splitted the project in multiple sub-directives, children of the main "<leaflet>" directive.
+* Added a leafletData service, where all the registered Leaflet object will be stored.
+* Added a leafletHelpers factory.
+* Added a leafletLayerHelpers factory.
+* Added a leafletMapDefaults factory.
+* Added a leafletEvents factory.
+* Using protractor as E2E framework.
+* Working with the lastest versions of AngularJS and Leaflet.
+
 ## angular-leaflet-directive (0.5.1)
 * fix: wrap marker click event broadcast in scope apply
 

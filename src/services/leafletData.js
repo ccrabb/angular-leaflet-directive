@@ -1,90 +1,78 @@
-angular.module("leaflet-directive").service('leafletData', function ($log, $q) {
-    var maps = {
-        main: $q.defer()
-    };
-    var tiles = {
-        main: $q.defer()
-    };
-    var layers = {
-        main: $q.defer()
-    };
-    var paths = {
-        main: $q.defer()
-    };
-    var markers = {
-        main: $q.defer()
-    };
-    var defaults = {};
+angular.module("leaflet-directive").service('leafletData', function ($log, $q, leafletHelpers) {
+    var getDefer = leafletHelpers.getDefer,
+        getUnresolvedDefer = leafletHelpers.getUnresolvedDefer,
+        setResolvedDefer = leafletHelpers.setResolvedDefer;
 
-    function getDefer(d, scopeId) {
-        if (!isDefined(scopeId)) {
-            scopeId = "main";
-        }
-        var defer;
-        if (!isDefined(d[scopeId])) {
-            defer = $q.defer();
-            d[scopeId] = defer;
-        } else {
-            defer = d[scopeId];
-        }
-        return defer;
-    }
+    var maps = {};
+    var tiles = {};
+    var layers = {};
+    var paths = {};
+    var markers = {};
+    var geoJSON = {};
 
     this.setMap = function(leafletMap, scopeId) {
-        var map = getDefer(maps, scopeId);
-        map.resolve(leafletMap);
+        var defer = getUnresolvedDefer(maps, scopeId);
+        defer.resolve(leafletMap);
+        setResolvedDefer(maps, scopeId);
     };
 
     this.getMap = function(scopeId) {
-        var map = getDefer(maps, scopeId);
-        return map.promise;
-    };
-
-    this.getDefaults = function() {
-        return defaults;
-    };
-
-    this.setDefaults = function(leafletDefaults) {
-        defaults = leafletDefaults;
+        var defer = getDefer(maps, scopeId);
+        return defer.promise;
     };
 
     this.getPaths = function(scopeId) {
-        var path = getDefer(paths, scopeId);
-        return path.promise;
+        var defer = getDefer(paths, scopeId);
+        return defer.promise;
     };
 
     this.setPaths = function(leafletPaths, scopeId) {
-        var path = getDefer(paths, scopeId);
-        path.resolve(leafletPaths);
+        var defer = getUnresolvedDefer(paths, scopeId);
+        defer.resolve(leafletPaths);
+        setResolvedDefer(paths, scopeId);
     };
 
     this.getMarkers = function(scopeId) {
-        var marker = getDefer(markers, scopeId);
-        return marker.promise;
+        var defer = getDefer(markers, scopeId);
+        return defer.promise;
     };
 
     this.setMarkers = function(leafletMarkers, scopeId) {
-        var marker = getDefer(markers, scopeId);
-        marker.resolve(leafletMarkers);
+        var defer = getUnresolvedDefer(markers, scopeId);
+        defer.resolve(leafletMarkers);
+        setResolvedDefer(markers, scopeId);
     };
 
     this.getLayers = function(scopeId) {
-        var layer = getDefer(layers, scopeId);
-        return layer.promise;
+        var defer = getDefer(layers, scopeId);
+        return defer.promise;
     };
 
     this.setLayers = function(leafletLayers, scopeId) {
-        var layer = getDefer(layers, scopeId);
-        layer.resolve(leafletLayers);
+        var defer = getUnresolvedDefer(layers, scopeId);
+        defer.resolve(leafletLayers);
+        setResolvedDefer(layers, scopeId);
     };
 
     this.setTiles = function(leafletTiles, scopeId) {
-        var tile = getDefer(tiles, scopeId);
-        tile.resolve(leafletTiles);
+        var defer = getUnresolvedDefer(tiles, scopeId);
+        defer.resolve(leafletTiles);
+        setResolvedDefer(tiles, scopeId);
     };
 
     this.getTiles = function(scopeId) {
-        var tile = getDefer(tiles, scopeId);
-        return tile.promise;
+        var defer = getDefer(tiles, scopeId);
+        return defer.promise;
+    };
+
+    this.setGeoJSON = function(leafletGeoJSON, scopeId) {
+        var defer = getUnresolvedDefer(geoJSON, scopeId);
+        defer.resolve(leafletGeoJSON);
+        setResolvedDefer(geoJSON, scopeId);
+    };
+
+    this.getGeoJSON = function(scopeId) {
+        var defer = getDefer(geoJSON, scopeId);
+        return defer.promise;
     };
 });

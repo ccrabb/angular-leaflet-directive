@@ -1,22 +1,17 @@
 module.exports = function(karma) {
     karma.set({
         // base path, that will be used to resolve files and exclude
-        basePath: '..',
+        basePath: '../',
 
         // list of files / patterns to load in the browser
         files: [
-            'test/lib/leaflet.js',
-            'test/lib/angular/angular.js',
-            'test/lib/angular/angular-mocks.js',
-            'test/lib/markercluster/leaflet.markercluster.js',
+            'bower_components/leaflet-dist/leaflet.js',
+            'bower_components/angular/angular.js',
+            'bower_components/leaflet.markerclusterer/dist/leaflet.markercluster.js',
+            'bower_components/angular-mocks/angular-mocks.js',
             'dist/angular-leaflet-directive.js',
-            'test/unit/leafletDirectiveSpec.js',
-            'test/unit/tilesDirectiveSpec.js',
-            'test/unit/centerDirectiveSpec.js',
-            'test/unit/pathsDirectiveSpec.js',
-            'test/unit/layersDirectiveSpec.js',
-            'test/unit/markersDirectiveSpec.js',
-            'test/unit/eventsDirectiveSpec.js'
+            //'src/**/*.js',
+            'test/unit/*.js'
         ],
 
         // Frameworks
@@ -34,8 +29,8 @@ module.exports = function(karma) {
         // - Safari
         // - PhantomJS
         browsers: [
-            //'Firefox'
-            //'Chrome'
+            //'Firefox',
+            //'Chrome',
             'PhantomJS'
         ],
 
@@ -57,7 +52,7 @@ module.exports = function(karma) {
         logLevel: karma.LOG_INFO,
 
         // enable / disable watching file and executing tests whenever any file changes
-        autoWatch: true,
+        autoWatch: false,
 
         // Continuous Integration mode
         // if true, it capture browsers, run tests and exit
