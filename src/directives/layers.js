@@ -152,6 +152,20 @@ angular.module("leaflet-directive").directive('layers', function ($log, $q, leaf
                                 }
                             }
                         }
+						// layer already exists, update options if appropriate
+						else {
+							if (newOverlayLayers[new_name].layerOptions && newOverlayLayers[new_name].layerOptions.opacity) {
+								if (leafletLayers.overlays[new_name].options.opacity != newOverlayLayers[new_name].layerOptions.opacity) {
+									leafletLayers.overlays[new_name].setOpacity(newOverlayLayers[new_name].layerOptions.opacity);
+								}
+							}
+
+							if (newOverlayLayers[new_name].layerOptions && newOverlayLayers[new_name].layerOptions.zIndex) {
+								if (leafletLayers.overlays.options.zIndex != newOverlayLayers[new_name].layerOptions.zIndex) {
+									leafletLayers.overlays.setZIndex(newOverlayLayers[new_name].layerOptions.zIndex);
+								}
+							}
+						}						
                     }
                 }, true);
             });
